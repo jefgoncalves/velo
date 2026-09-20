@@ -37,6 +37,14 @@ export function createConfiguratorActions(page: Page) {
       await checkoutButton.click()
     },
 
+    async finishConfigurator() {
+      await checkoutButton.click()
+    },
+
+    async expectPrice(price: string | RegExp) {
+      await expect(totalPrice).toHaveText(price)
+    },
+
     async validateExteriorImage(colorId: ExteriorColorId, wheelType: WheelTypeId) {
       await expect(carImage).toHaveAttribute(
         'alt',

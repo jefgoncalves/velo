@@ -1,86 +1,66 @@
 import { test, expect } from '../support/fixtures'
 import { generateOrderCode } from '../support/helpers'
 import type { OrderDetails } from '../support/actions/orderLookupActions'
+import { insertOrder, deleteOrderByNumber } from '../support/database/orderRepository'
+
+import testData from '../support/fixtures/orders.json' with { type: 'json' }
 
 test.describe('Consulta de Pedido', () => {
-    test.beforeEach(async ({ app }) => {
-        await app.orderLookup.open()
-    })
 
-    test('deve consultar um pedido aprovado', async ({ app }) => {
-        // Test Data
-        const order: OrderDetails = {
-            number: 'VLO-IPBA1D',
-            status: 'APROVADO',
-            color: 'Midnight Black',
-            wheels: 'sport Wheels',
-            customer: {
-                name: 'Jef Goncalves',
-                email: 'jefgoncalvs@velo.dev'
-            },
-            payment: 'À Vista'
-        };
+  test.beforeEach(async ({ app }) => {
+    await app.orderLookup.open()
+  })
 
-        await app.orderLookup.searchOrder(order.number)
-        await app.orderLookup.validateOrderDetails(order)
-        await app.orderLookup.validateStatusBadge(order.status)
-    })
+  test('deve consultar um pedido aprovado', async ({ app }) => {
+    const order: OrderDetails = testData.aprovado as OrderDetails
 
-    test('deve consultar um pedido reprovado', async ({ app }) => {
-        // Test Data
-        const order: OrderDetails = {
-            number: 'VLO-GXP8JD',
-            status: 'REPROVADO',
-            color: 'Midnight Black',
-            wheels: 'sport Wheels',
-            customer: {
-                name: 'Joao Silva',
-                email: 'joaosilva@mailinator.com'
-            },
-            payment: 'À Vista'
-        };
+    await deleteOrderByNumber(order.number)
+    await insertOrder(order)
 
-        await app.orderLookup.searchOrder(order.number)
-        await app.orderLookup.validateOrderDetails(order)
-        await app.orderLookup.validateStatusBadge(order.status)
-    })
+    await app.orderLookup.searchOrder(order.number)
+    await app.orderLookup.validateOrderDetails(order)
+    await app.orderLookup.validateStatusBadge(order.status)
+  })
 
-    test('deve consultar um pedido em analise', async ({ app }) => {
-        // Test Data
-        const order: OrderDetails = {
-            number: 'VLO-WFGVT4',
-            status: 'EM_ANALISE',
-            color: 'Glacier Blue',
-            wheels: 'aero Wheels',
-            customer: {
-                name: 'jose Joao',
-                email: 'josesilva@velo.dev'
-            },
-            payment: 'À Vista'
-        }
+  test('deve consultar um pedido reprovado', async ({ app }) => {
+    const order: OrderDetails = testData.reprovado as OrderDetails
 
-        await app.orderLookup.searchOrder(order.number)
-        await app.orderLookup.validateOrderDetails(order)
-        await app.orderLookup.validateStatusBadge(order.status)
-    })
+    await deleteOrderByNumber(order.number)
+    await insertOrder(order)
 
-    test('deve exibir mensagem quando o pedido não é encontrado', async ({ app }) => {
-        const order = generateOrderCode()
-        await app.orderLookup.searchOrder(order)
-        await app.orderLookup.validateOrderNotFound()
-    })
+    await app.orderLookup.searchOrder(order.number)
+    await app.orderLookup.validateOrderDetails(order)
+    await app.orderLookup.validateStatusBadge(order.status)
+  })
 
-    test('deve exibir mensagem quando o código do pedido está fora do padrão', async ({ app }) => {
-        const orderCode = 'XYZ-999-INVALIDO'
-        await app.orderLookup.searchOrder(orderCode)
-        await app.orderLookup.validateOrderNotFound()
-    })
+  test('deve consultar um pedido em analise', async ({ app }) => {
+    const order: OrderDetails = testData.em_analise as OrderDetails
 
-    test('deve manter o botão de busca desabilitado com campo vazio ou apenas espacos', async ({ app, page }) => {
-        const button = app.orderLookup.elements.searchButton;
-        await expect(button).toBeDisabled();
-        await app.orderLookup.elements.orderInput.fill('     ');
-        await expect(button).toBeDisabled();
+    await deleteOrderByNumber(order.number)
+    await insertOrder(order)
 
-    })
+    await app.orderLookup.searchOrder(order.number)
+    await app.orderLookup.validateOrderDetails(order)
+    await app.orderLookup.validateStatusBadge(order.status)
+  })
+
+  test('deve exibir mensagem quando o pedido não é encontrado', async ({ app }) => {
+    const order = generateOrderCode()
+    await app.orderLookup.searchOrder(order)
+    await app.orderLookup.validateOrderNotFound()
+  })
+
+  test('deve exibir mensagem quando o código do pedido está fora do padrão', async ({ app }) => {
+    const orderCode = 'XYZ-999-INVALIDO'
+    await app.orderLookup.searchOrder(orderCode)
+    await app.orderLookup.validateOrderNotFound()
+  })
+
+  test('deve manter o botão de busca desabilitado com campo vazio ou apenas espaços', async ({ app, page }) => {
+    const button = app.orderLookup.elements.searchButton
+    await expect(button).toBeDisabled()
+
+    await app.orderLookup.elements.orderInput.fill('     ')
+    await expect(button).toBeDisabled()
+  })
 })
