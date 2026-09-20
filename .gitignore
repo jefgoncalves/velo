@@ -29,3 +29,9 @@ dist-ssr
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Environment variables and secrets
+.env
+.env*.local
+*.env
+Docs/db-password.txt
