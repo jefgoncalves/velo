@@ -1,8 +1,6 @@
 import { test, expect } from '../support/fixtures'
 import { generateOrderCode } from '../support/helpers'
 import type { OrderDetails } from '../support/actions/orderLookupActions'
-import { allowedNodeEnvironmentFlags, setUncaughtExceptionCaptureCallback } from 'process'
-import { waitForDebugger } from 'inspector'
 
 test.describe('Consulta de Pedido', () => {
     test.beforeEach(async ({ app }) => {
